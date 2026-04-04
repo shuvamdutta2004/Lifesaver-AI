@@ -1,0 +1,57 @@
+[
+  {
+    "id": "h1",
+    "name": "Government General Hospital",
+    "type": "hospital",
+    "lat": 13.0780,
+    "lng": 80.2785,
+    "phone": "044-2530-5000",
+    "distance": "0.8 km",
+    "beds": 120,
+    "open24h": true
+  },
+  {
+    "id": "h2",
+    "name": "Apollo Hospital",
+    "type": "hospital",
+    "lat": 13.0600,
+    "lng": 80.2500,
+    "phone": "044-2829-0200",
+    "distance": "2.1 km",
+    "beds": 500,
+    "open24h": true
+  },
+  {
+    "id": "h3",
+    "name": "MIOT International",
+    "type": "hospital",
+    "lat": 13.0100,
+    "lng": 80.1900,
+    "phone": "044-4200-2288",
+    "distance": "3.4 km",
+    "beds": 250,
+    "open24h": true
+  },
+  {
+    "id": "h4",
+    "name": "Fortis Malar Hospital",
+    "type": "hospital",
+    "lat": 13.0107,
+    "lng": 80.2649,
+    "phone": "044-4289-2222",
+    "distance": "4.0 km",
+    "beds": 200,
+    "open24h": true
+  },
+  {
+    "id": "h5",
+    "name": "Stanley Medical College",
+    "type": "hospital",
+    "lat": 13.1086,
+    "lng": 80.2888,
+    "phone": "044-2528-5000",
+    "distance": "2.9 km",
+    "beds": 1500,
+    "open24h": true
+  }
+]

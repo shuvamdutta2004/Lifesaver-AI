@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String             @id @default(cuid())
+  createdAt   DateTime           @default(now()) @map("created_at")
+  name        String?
+  email       String?            @unique
+  phone       String?
+  firebaseUid String?            @unique @map("firebase_uid")
+
+  // Relations
+  sosEvents          SosEvent[]
+  emergencyContacts  EmergencyContact[]
+  helperProfile      Helper?
+
+  @@map("users")
+}
+
+model SosEvent {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  type        EmergencyType
+  lat         Float?
+  lng         Float?
+  city        String?
+  status      SosStatus     @default(ACTIVE)
+  resolvedAt  DateTime?     @map("resolved_at")
+  source      String        @default("web-pwa")
+  userId      String?       @map("user_id")
+
+  // Relations
+  user        User?         @relation(fields: [userId], references: [id])
+  alerts      Alert[]
+  notificationLogs NotificationLog[]
+
+  @@map("sos_events")
+}
+
+model Helper {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  name      String
+  phone     String
+  role      String   @default("Volunteer")
+  verified  Boolean  @default(false)
+  available Boolean  @default(true)
+  rating    Float    @default(5.0)
+  lat       Float?
+  lng       Float?
+  userId    String   @unique @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("helpers")
+}
+
+model Alert {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now()) @map("created_at")
+  type        EmergencyType
+  message     String
+  lat         Float?
+  lng         Float?
+  active      Boolean       @default(true)
+  sosEventId  String?       @map("sos_event_id")
+  sosEvent    SosEvent?     @relation(fields: [sosEventId], references: [id])
+
+  @@map("alerts")
+}
+
+model NotificationLog {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  sosEventId     String   @map("sos_event_id")
+  sosEvent       SosEvent @relation(fields: [sosEventId], references: [id], onDelete: Cascade)
+  recipientPhone String   @map("recipient_phone")
+  recipientType  String   @map("recipient_type")
+  messageType    String   @map("message_type")
+  status         String   @default("PENDING")
+  attempt        Int      @default(0)
+  twilioSid      String?  @map("twilio_sid")
+  errorMsg       String?  @map("error_msg")
+
+  @@index([sosEventId])
+  @@index([recipientPhone])
+  @@map("notification_logs")
+}
+
+model EmergencyContact {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now()) @map("created_at")
+  name       String
+  phone      String
+  relation   String
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("emergency_contacts")
+}
+
+model Hospital {
+  id       String  @id @default(cuid())
+  name     String
+  phone    String
+  lat      Float
+  lng      Float
+  city     String  @default("Chennai")
+  beds     Int     @default(0)
+  open24h  Boolean @default(true) @map("open_24h")
+
+  @@map("hospitals")
+}
+
+enum EmergencyType {
+  MEDICAL
+  WOMEN_SAFETY
+  FIRE
+  FLOOD
+  EARTHQUAKE
+
+  @@map("emergency_type")
+}
+
+enum SosStatus {
+  ACTIVE
+  RESOLVED
+  FALSE_ALARM
+
+  @@map("sos_status")
+}

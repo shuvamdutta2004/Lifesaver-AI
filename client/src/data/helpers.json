@@ -1,0 +1,54 @@
+[
+  {
+    "id": "helper1",
+    "name": "Suresh Kumar",
+    "role": "First Aid Volunteer",
+    "lat": 13.0855,
+    "lng": 80.2730,
+    "distance": "0.4 km",
+    "eta": "2 min",
+    "rating": 4.9,
+    "verified": true,
+    "phone": "+91-98400-11111",
+    "avatar": "SK"
+  },
+  {
+    "id": "helper2",
+    "name": "Priya Meenakshi",
+    "role": "Medical Student",
+    "lat": 13.0800,
+    "lng": 80.2650,
+    "distance": "0.9 km",
+    "eta": "4 min",
+    "rating": 4.7,
+    "verified": true,
+    "phone": "+91-98400-22222",
+    "avatar": "PM"
+  },
+  {
+    "id": "helper3",
+    "name": "Ravi Shankar",
+    "role": "Fire Safety Officer",
+    "lat": 13.0900,
+    "lng": 80.2800,
+    "distance": "1.2 km",
+    "eta": "5 min",
+    "rating": 4.8,
+    "verified": true,
+    "phone": "+91-98400-33333",
+    "avatar": "RS"
+  },
+  {
+    "id": "helper4",
+    "name": "Ananya Singh",
+    "role": "NGO Responder",
+    "lat": 13.0750,
+    "lng": 80.2900,
+    "distance": "1.5 km",
+    "eta": "6 min",
+    "rating": 4.6,
+    "verified": true,
+    "phone": "+91-98400-44444",
+    "avatar": "AS"
+  }
+]

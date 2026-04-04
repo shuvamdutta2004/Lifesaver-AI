@@ -1,0 +1,26 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Env files (NEVER commit these)
+.env
+.env.local
+.env.production
+
+# Firebase service account (NEVER commit this)
+server/firebase-service-account.json
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/settings.json
+.idea/

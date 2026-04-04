@@ -6,10 +6,23 @@ const router = express.Router()
 const ORS_BASE_URL = (process.env.ORS_BASE_URL || 'https://api.openrouteservice.org').replace(/\/$/, '')
 const OSRM_BASE_URL = (process.env.OSRM_BASE_URL || 'https://router.project-osrm.org').replace(/\/$/, '')
 const SNAP_RADIUS_METERS = Number(process.env.ROUTE_SNAP_RADIUS_METERS || 3000)
+const ORS_MAX_ROUTE_DISTANCE_METERS = Math.max(1000, Number(process.env.ORS_MAX_ROUTE_DISTANCE_METERS || 150000))
 
 function toNumber(v) {
   const n = Number(v)
   return Number.isFinite(n) ? n : null
+}
+
+function haversineMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
 function profileToOsrm(profile) {
@@ -147,8 +160,10 @@ router.get('/', async (req, res) => {
   let provider = 'none'
   let fallback = false
   const orsKey = (process.env.ORS_API_KEY || '').trim()
+  const linearDistanceEstimate = haversineMeters(originLat, originLng, destinationLat, destinationLng)
+  const orsDistanceTooLong = linearDistanceEstimate > ORS_MAX_ROUTE_DISTANCE_METERS
 
-  if (orsKey && !orsKey.includes('YOUR_')) {
+  if (orsKey && !orsKey.includes('YOUR_') && !orsDistanceTooLong) {
     try {
       const body = {
         coordinates: [
@@ -184,6 +199,10 @@ router.get('/', async (req, res) => {
     } catch (err) {
       console.warn('[Directions] ORS request failed:', err.response?.data || err.message)
     }
+  } else if (orsDistanceTooLong) {
+    console.info(
+      `[Directions] Skipping ORS for long route (${Math.round(linearDistanceEstimate)}m > ${ORS_MAX_ROUTE_DISTANCE_METERS}m)`,
+    )
   }
 
   if (normalizedRoutes.length === 0) {

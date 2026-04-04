@@ -6,6 +6,9 @@ const fromNumber = (process.env.TWILIO_PHONE_NUMBER || '').trim()
 const defaultCountryCode = (process.env.DEFAULT_PHONE_COUNTRY_CODE || '91').trim()
 
 const client = accountSid && authToken ? twilio(accountSid, authToken) : null
+let cachedAccountFromNumber = null
+let cachedPreferredFromNumber = null
+let didWarnSenderMismatch = false
 
 function stripToDigits(value = '') {
   return String(value).replace(/\D/g, '')
@@ -21,7 +24,67 @@ function escapeXml(value = '') {
 }
 
 export function isTwilioConfigured() {
-  return Boolean(client && fromNumber)
+  return Boolean(client)
+}
+
+function isFromNumberMismatchError(error) {
+  const code = Number(error?.code || 0)
+  const message = String(error?.message || '').toLowerCase()
+  return code === 21606 || message.includes("mismatch between the 'from' number")
+}
+
+async function resolveAccountOwnedFromNumber({ forceRefresh = false } = {}) {
+  if (!client) return null
+  if (cachedAccountFromNumber && !forceRefresh) return cachedAccountFromNumber
+
+  try {
+    const incomingNumbers = await client.incomingPhoneNumbers.list({ limit: 1 })
+    const discovered = incomingNumbers?.[0]?.phoneNumber || null
+    cachedAccountFromNumber = discovered
+    return discovered
+  } catch {
+    return null
+  }
+}
+
+function samePhone(a, b) {
+  const n1 = normalizePhoneNumber(a)
+  const n2 = normalizePhoneNumber(b)
+  return Boolean(n1 && n2 && n1 === n2)
+}
+
+async function resolveFromNumber({ forceRefresh = false } = {}) {
+  if (cachedPreferredFromNumber && !forceRefresh) {
+    return cachedPreferredFromNumber
+  }
+
+  const accountOwnedFrom = await resolveAccountOwnedFromNumber({ forceRefresh })
+
+  if (!fromNumber) {
+    cachedPreferredFromNumber = accountOwnedFrom
+    return cachedPreferredFromNumber
+  }
+
+  if (!accountOwnedFrom) {
+    cachedPreferredFromNumber = fromNumber
+    return cachedPreferredFromNumber
+  }
+
+  if (samePhone(fromNumber, accountOwnedFrom)) {
+    cachedPreferredFromNumber = fromNumber
+    return cachedPreferredFromNumber
+  }
+
+  cachedPreferredFromNumber = accountOwnedFrom
+
+  if (!didWarnSenderMismatch) {
+    console.warn(
+      `[Twilio] TWILIO_PHONE_NUMBER ${fromNumber} does not belong to this account. Using ${accountOwnedFrom} instead.`,
+    )
+    didWarnSenderMismatch = true
+  }
+
+  return cachedPreferredFromNumber
 }
 
 export function normalizePhoneNumber(rawPhone) {
@@ -65,11 +128,31 @@ export async function sendSMS({ to, body }) {
   }
 
   return executeIfConfigured('sms', async () => {
-    const message = await client.messages.create({
-      to: normalizedTo,
-      from: fromNumber,
-      body,
-    })
+    const primaryFrom = await resolveFromNumber()
+    if (!primaryFrom) {
+      throw new Error('Twilio sender number unavailable. Set TWILIO_PHONE_NUMBER or add a Twilio incoming number.')
+    }
+
+    let message
+
+    try {
+      message = await client.messages.create({
+        to: normalizedTo,
+        from: primaryFrom,
+        body,
+      })
+    } catch (error) {
+      if (!isFromNumberMismatchError(error)) throw error
+
+      const fallbackFrom = await resolveFromNumber({ forceRefresh: true })
+      if (!fallbackFrom || fallbackFrom === primaryFrom) throw error
+
+      message = await client.messages.create({
+        to: normalizedTo,
+        from: fallbackFrom,
+        body,
+      })
+    }
 
     return {
       skipped: false,
@@ -89,9 +172,14 @@ export async function sendCall({ to, message }) {
   const safeMessage = escapeXml(message)
 
   return executeIfConfigured('call', async () => {
+    const resolvedFrom = await resolveFromNumber()
+    if (!resolvedFrom) {
+      throw new Error('Twilio caller number unavailable. Set TWILIO_PHONE_NUMBER or add a Twilio incoming number.')
+    }
+
     const call = await client.calls.create({
       to: normalizedTo,
-      from: fromNumber,
+      from: resolvedFrom,
       twiml: `<Response><Say voice="alice">${safeMessage}</Say></Response>`,
     })
 

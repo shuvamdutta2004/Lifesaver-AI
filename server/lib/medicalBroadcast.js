@@ -10,6 +10,26 @@ const HOSPITAL_NOTIFY_MODE = String(process.env.BROADCAST_HOSPITAL_MODE || 'sms'
 const HELPER_SMS_MAX = Math.max(0, Number(process.env.BROADCAST_HELPER_SMS_MAX || 5))
 const CONTACT_SMS_MAX = Math.max(0, Number(process.env.BROADCAST_CONTACT_SMS_MAX || 3))
 
+function selectDemoRecipients() {
+  const raw = (process.env.TWILIO_DEMO_NUMBERS || '').trim()
+  if (!raw) return []
+
+  const uniqueByPhone = new Map()
+
+  for (const value of raw.split(',')) {
+    const normalizedPhone = normalizePhoneNumber(value)
+    if (!normalizedPhone) continue
+    if (!uniqueByPhone.has(normalizedPhone)) {
+      uniqueByPhone.set(normalizedPhone, {
+        name: 'Demo Recipient',
+        phone: normalizedPhone,
+      })
+    }
+  }
+
+  return [...uniqueByPhone.values()]
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -298,8 +318,9 @@ async function processMedicalJob(job) {
   const hospitals = (await selectHospitals(lat, lng)).slice(0, HOSPITAL_SMS_MAX)
   const helpers = (await selectHelpers(lat, lng)).slice(0, HELPER_SMS_MAX)
   const emergencyContacts = (await selectEmergencyContacts(event.userId)).slice(0, CONTACT_SMS_MAX)
+  const demoRecipients = selectDemoRecipients()
 
-  if (hospitals.length === 0 && helpers.length === 0 && emergencyContacts.length === 0) {
+  if (hospitals.length === 0 && helpers.length === 0 && emergencyContacts.length === 0 && demoRecipients.length === 0) {
     await logNotification({
       eventId: sosEventId,
       phone: 'n/a',
@@ -338,6 +359,13 @@ async function processMedicalJob(job) {
     event,
     recipients: emergencyContacts,
     recipientType: 'EMERGENCY_CONTACT',
+    messageBuilder: (evt) => buildEmergencyContactSmsMessage(evt),
+  })
+
+  await sendSmsRecipients({
+    event,
+    recipients: demoRecipients,
+    recipientType: 'DEMO',
     messageBuilder: (evt) => buildEmergencyContactSmsMessage(evt),
   })
 }

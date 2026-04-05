@@ -1,0 +1,84 @@
+{
+  "safezones": [
+    {
+      "id": "sz1",
+      "name": "Marina Beach Safe Zone",
+      "type": "open_ground",
+      "lat": 13.0500,
+      "lng": 80.2824,
+      "capacity": 5000,
+      "amenities": ["water", "first_aid", "food"],
+      "coordinates": [
+        [13.0480, 80.2800],
+        [13.0480, 80.2850],
+        [13.0520, 80.2850],
+        [13.0520, 80.2800]
+      ]
+    },
+    {
+      "id": "sz2",
+      "name": "Nehru Indoor Stadium",
+      "type": "shelter",
+      "lat": 13.0569,
+      "lng": 80.2491,
+      "capacity": 2000,
+      "amenities": ["water", "first_aid", "food", "electricity"],
+      "coordinates": [
+        [13.0550, 80.2475],
+        [13.0550, 80.2510],
+        [13.0585, 80.2510],
+        [13.0585, 80.2475]
+      ]
+    }
+  ],
+  "shelters": [
+    {
+      "id": "sh1",
+      "name": "Corporation Shelter - T Nagar",
+      "lat": 13.0418,
+      "lng": 80.2341,
+      "capacity": 300,
+      "current_occupancy": 120,
+      "distance": "1.8 km",
+      "supplies": ["food", "water", "blankets", "medicine"]
+    },
+    {
+      "id": "sh2",
+      "name": "School Emergency Shelter - Adyar",
+      "lat": 13.0012,
+      "lng": 80.2565,
+      "capacity": 500,
+      "current_occupancy": 89,
+      "distance": "2.5 km",
+      "supplies": ["food", "water", "blankets"]
+    },
+    {
+      "id": "sh3",
+      "name": "Govt. Sports Complex - Anna Nagar",
+      "lat": 13.0850,
+      "lng": 80.2101,
+      "capacity": 800,
+      "current_occupancy": 200,
+      "distance": "3.2 km",
+      "supplies": ["food", "water", "electricity", "medicine"]
+    }
+  ],
+  "evacuationRoutes": [
+    {
+      "id": "er1",
+      "name": "Route A – Inland High Ground",
+      "direction": "West",
+      "description": "Head west on Anna Salai → NH 48 → Tambaram elevated zone",
+      "distance": "12 km",
+      "safetyLevel": "high"
+    },
+    {
+      "id": "er2",
+      "name": "Route B – Northern Corridor",
+      "direction": "North",
+      "description": "Via NH 16 towards Ennore → industrial elevated area",
+      "distance": "18 km",
+      "safetyLevel": "medium"
+    }
+  ]
+}

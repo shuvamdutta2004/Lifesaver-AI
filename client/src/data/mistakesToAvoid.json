@@ -1,0 +1,37 @@
+{
+  "medical": [
+    "❌ Do NOT move the person unnecessarily",
+    "❌ Do NOT give food or water",
+    "❌ Do NOT assume person is conscious",
+    "❌ Do NOT leave them alone",
+    "❌ Do NOT panic or delay calling ambulance"
+  ],
+  "fire": [
+    "❌ Do NOT use elevators or lifts",
+    "❌ Do NOT open hot doors (test with hand first)",
+    "❌ Do NOT go back for belongings",
+    "❌ Do NOT hide in a room (unless no escape possible)",
+    "❌ Do NOT jump from windows"
+  ],
+  "flood": [
+    "❌ Do NOT walk or drive through flood water",
+    "❌ Do NOT stay on ground floor in rising water",
+    "❌ Do NOT assume floodwater is clean or safe",
+    "❌ Do NOT wait for 'official' evacuation if water rising fast",
+    "❌ Do NOT return home until authorities clear it"
+  ],
+  "women_safety": [
+    "❌ Do NOT isolate yourself further",
+    "❌ Do NOT confront the threat alone",
+    "❌ Do NOT go to an isolated location",
+    "❌ Do NOT trust the person if threatened",
+    "❌ Do NOT delay calling police (100 or 1091)"
+  ],
+  "earthquake": [
+    "❌ Do NOT run outside during shaking (objects may fall)",
+    "❌ Do NOT use elevators",
+    "❌ Do NOT stand in doorways (myth - not safe in modern buildings)",
+    "❌ Do NOT go up or down stairs during shaking",
+    "❌ Do NOT panic or scream (stay calm)"
+  ]
+}

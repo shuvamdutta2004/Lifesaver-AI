@@ -92,6 +92,10 @@ export default function MapView({ showShelters = false }) {
   const [ready, setReady] = useState(false);
   const [routeTo, setRouteTo] = useState(null);
 
+  // Escape Intelligence state
+  const [escapeData, setEscapeData] = useState(null);
+  const [escapeLoading, setEscapeLoading] = useState(false);
+
   const demoResponders = [
     {
       id: "d1",
@@ -155,6 +159,34 @@ export default function MapView({ showShelters = false }) {
       };
       loadResources();
     }
+  }, [sosActive, userLocation, emergencyType]);
+
+  // Fetch escape intelligence when SOS is active
+  useEffect(() => {
+    if (!sosActive || !userLocation || !emergencyType) return;
+
+    setEscapeLoading(true);
+    axios
+      .get(`${API_BASE}/api/escape`, {
+        params: {
+          lat: userLocation.lat,
+          lng: userLocation.lng,
+          type: emergencyType,
+          radius: 5,
+        },
+        timeout: 5000,
+      })
+      .then(({ data }) => {
+        if (data.success) {
+          setEscapeData(data);
+        }
+      })
+      .catch(() => {
+        // Silently fail - not critical
+      })
+      .finally(() => {
+        setEscapeLoading(false);
+      });
   }, [sosActive, userLocation, emergencyType]);
 
   useEffect(() => {
@@ -424,6 +456,63 @@ export default function MapView({ showShelters = false }) {
                 </div>
               </Popup>
             </Marker>
+          </>
+        )}
+
+        {/* DANGER ZONES (from Escape Intelligence) */}
+        {escapeData?.dangerZones?.map((zone, idx) => (
+          <Circle
+            key={`danger-${idx}`}
+            center={[zone.center.lat, zone.center.lng]}
+            radius={zone.radiusKm * 1000}
+            pathOptions={{
+              color: zone.color || "#EF4444",
+              fillColor: zone.color || "#EF4444",
+              fillOpacity: 0.1,
+              weight: 2,
+              dashArray: "5, 5",
+            }}
+          >
+            <Popup>
+              <div className="text-xs font-bold text-danger-red">{zone.description}</div>
+            </Popup>
+          </Circle>
+        ))}
+
+        {/* ESCAPE DIRECTION ARROW (from Escape Intelligence) */}
+        {escapeData?.primaryEscape && userLocation && (
+          <>
+            {/* Arrow line from user to safe zone */}
+            <Polyline
+              positions={[
+                [userLocation.lat, userLocation.lng],
+                [escapeData.primaryEscape.lat, escapeData.primaryEscape.lng],
+              ]}
+              pathOptions={{
+                color: "#FCD34D",
+                weight: 3,
+                opacity: 0.7,
+                dashArray: "4, 4",
+                lineJoin: "round",
+              }}
+            />
+            {/* Safe zone highlight circle */}
+            <Circle
+              center={[escapeData.primaryEscape.lat, escapeData.primaryEscape.lng]}
+              radius={300}
+              pathOptions={{
+                color: "#10B981",
+                fillColor: "#10B981",
+                fillOpacity: 0.15,
+                weight: 2,
+              }}
+            >
+              <Popup>
+                <div className="text-sm font-bold text-safe-green">✅ {escapeData.primaryEscape.name}</div>
+                <div className="text-xs text-gray-400">Distance: {escapeData.primaryEscape.distance.toFixed(1)} km</div>
+                <div className="text-xs text-gray-400">Capacity: {escapeData.primaryEscape.current_occupancy}/{escapeData.primaryEscape.capacity}</div>
+              </Popup>
+            </Circle>
           </>
         )}
 

@@ -17,6 +17,7 @@ import chatRoutes from './routes/chat.js'
 import placesRoutes from './routes/places.js'
 import directionsRoutes from './routes/directions.js'
 import twilioRoutes from './routes/twilio.js'
+import escapeRoutes from './routes/escape.js'
 import errorHandler from './middleware/errorHandler.js'
 
 const app  = express()
@@ -82,6 +83,7 @@ app.use('/api/alerts', alertRoutes)
 app.use('/api/places', placesRoutes)
 app.use('/api/directions', directionsRoutes)
 app.use('/api/twilio', twilioRoutes)
+app.use('/api/escape', escapeRoutes)
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/health', (_, res) => res.json({
